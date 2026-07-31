@@ -1,0 +1,261 @@
+{% extends 'base2.html' %}
+{% block title %}{{ temple.name }} - Details | SmartPilgrim{% endblock %}
+{% block header_title %}Sacred Venue Details{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 animate-in fade-in duration-700">
+    
+    <nav class="flex mb-10 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+        <a href="{% url 'user_dashboard' %}" class="hover:text-[#1A5F7A] transition-colors">Portal</a>
+        <span class="mx-3 text-[#FFC107]">•</span>
+        <a href="{% url 'temple_list' %}" class="hover:text-[#1A5F7A] transition-colors">Explore</a>
+        <span class="mx-3 text-[#FFC107]">•</span>
+        <span class="text-[#1A5F7A]">{{ temple.name }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        
+        <div class="lg:col-span-4 space-y-8">
+            <div class="sticky top-28">
+                <div class="rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white mb-8 group bg-gray-50">
+                    {% if temple.image %}
+                        <img src="{{ temple.image.url }}" class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-1000">
+                    {% else %}
+                        <div class="w-full h-80 flex items-center justify-center">
+                            <i class="fa-solid fa-image text-6xl text-gray-200"></i>
+                        </div>
+                    {% endif %}
+                </div>s
+                <div class="glass-card p-10 text-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-amber-50/50 to-transparent"></div>
+                    <div class="relative z-10">
+                        <h4 class="divine-font text-2xl font-bold text-[#1A5F7A] mb-6">Plan Your Visit</h4>
+                        <div class="space-y-4">
+                            <div class="space-y-4 max-h-[420px] overflow-y-auto">
+
+                                {% if slots %}
+                                    {% for slot in slots %}
+                                    <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+
+                                        <div>
+                                            <p class="text-sm font-bold text-[#1A5F7A]">
+                                                {{ slot.get_slot_type_display }}
+                                            </p>
+                                            <p class="text-xs text-gray-500">
+                                                {{ slot.date|date:"d M Y" }}
+                                            </p>
+
+                                            {% if slot.available_tickets > 0 %}
+                                                <p class="text-xs font-bold text-green-600">
+                                                    {{ slot.available_tickets }} passes left
+                                                </p>
+                                            {% else %}
+                                                <p class="text-xs font-bold text-red-500">
+                                                    Fully Booked
+                                                </p>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if slot.available_tickets > 0 %}
+                                            <a href="{% url 'book_darshan' slot.id %}"
+                                            class="px-4 py-2 bg-[#1A5F7A] text-white text-xs font-black rounded-xl hover:bg-[#FFC107] hover:text-[#1A5F7A] transition">
+                                                Book
+                                            </a>
+                                        {% else %}
+                                            <button disabled
+                                                class="px-4 py-2 bg-gray-200 text-gray-500 text-xs font-black rounded-xl cursor-not-allowed">
+                                                Full
+                                            </button>
+                                        {% endif %}
+
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- 🔴 THIS handles your requirement -->
+                                    <div class="text-center py-10">
+                                        <p class="text-sm font-bold text-gray-400">
+                                            No darshan slots available for this temple
+                                        </p>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                            <a href="{% url 'donate_now' %}?temple={{ temple.id }}" class="w-full py-5 bg-white text-[#1A5F7A] rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-[#F8F9FA] hover:border-[#FFC107] transition-all flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-hand-holding-heart text-[#FFC107]"></i>
+                                Online Dakshan
+                            </a>
+                        </div>
+                        <p class="mt-6 text-[9px] font-bold text-gray-400 uppercase tracking-widest italic">
+                            Secure your darshan time to avoid long queues.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-12">
+            
+            <div class="space-y-6">
+                <div class="flex flex-wrap items-center gap-4">
+                    <h1 class="divine-font text-6xl font-bold text-[#1A5F7A] leading-tight">{{ temple.name }}</h1>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-6">
+                    {% if crowd_status == 'HIGH' %}
+                        <div class="flex items-center gap-3 px-6 py-3 bg-red-50 text-red-600 rounded-2xl text-xs font-black border border-red-100 shadow-sm">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                            </span>
+                            PEAK CROWD: {{ crowd_reason }}
+                        </div>
+                    {% elif crowd_status == 'MEDIUM' %}
+                        <div class="px-6 py-3 bg-amber-50 text-amber-600 rounded-2xl text-xs font-black border border-amber-100">
+                            <i class="fa-solid fa-users mr-2"></i> MODERATE: {{ crowd_reason }}
+                        </div>
+                    {% else %}
+                        <div class="px-6 py-3 bg-green-50 text-green-600 rounded-2xl text-xs font-black border border-green-100">
+                            <i class="fa-solid fa-leaf mr-2"></i> PEACEFUL: {{ crowd_reason }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="h-10 w-[1px] bg-gray-100 hidden md:block"></div>
+                    
+                    <div class="flex items-center gap-3 text-xs font-black text-[#FFC107] uppercase tracking-[0.2em]">
+                        <i class="fa-solid fa-om text-lg"></i>
+                        Deity: {{ temple.deity|default:"Sacred Lord" }}
+                    </div>
+                </div>
+
+                <p class="text-gray-500 leading-relaxed text-xl font-medium first-letter:text-5xl first-letter:font-bold first-letter:text-[#1A5F7A] first-letter:mr-3 first-letter:float-left">
+                    {{ temple.description }}
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 bg-blue-50/20 border-blue-50">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#1A5F7A] shadow-sm mb-6">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
+                    <h5 class="font-black text-[#1A5F7A] uppercase text-[10px] tracking-widest mb-3">Entrance Protocol</h5>
+                    <p class="text-xs text-gray-500 leading-relaxed font-medium">{{ temple.entry_gate_info }}</p>
+                </div>
+                <div class="glass-card p-8 bg-amber-50/20 border-amber-50">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#FFC107] shadow-sm mb-6">
+                        <i class="fa-solid fa-place-of-worship"></i>
+                    </div>
+                    <h5 class="font-black text-[#1A5F7A] uppercase text-[10px] tracking-widest mb-3">Darshan Mandapam</h5>
+                    <p class="text-xs text-gray-500 leading-relaxed font-medium">{{ temple.darshan_hall_info }}</p>
+                </div>
+                <div class="glass-card p-8 bg-red-50/20 border-red-50">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-sm mb-6">
+                        <i class="fa-solid fa-door-closed"></i>
+                    </div>
+                    <h5 class="font-black text-[#1A5F7A] uppercase text-[10px] tracking-widest mb-3">Exit Flow</h5>
+                    <p class="text-xs text-gray-500 leading-relaxed font-medium">{{ temple.exit_gate_info }}</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="flex justify-between items-end">
+                    <h4 class="divine-font text-2xl font-bold text-[#1A5F7A]">Location & Directions</h4>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ temple.latitude }},{{ temple.longitude }}" target="_blank" class="text-[10px] font-black text-[#FFC107] uppercase tracking-widest hover:underline">
+                        Open in Google Maps <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i>
+                    </a>
+                </div>
+                
+                <div class="rounded-[3.5rem] bg-gray-100 h-96 relative overflow-hidden shadow-inner border-4 border-white group">
+                    <div id="templeMap" class="w-full h-full"></div>
+                    
+                    <div class="absolute inset-0 bg-white/10 backdrop-blur-[1px] pointer-events-none group-hover:backdrop-blur-0 transition-all"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+{% if temple.latitude and temple.longitude %}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const lat = {{ temple.latitude }};
+    const lng = {{ temple.longitude }};
+    const templeName = "{{ temple.name|escapejs }}";
+
+    // Initialize Map
+    const map = L.map('templeMap', {
+        zoomControl: false,
+        scrollWheelZoom: true
+    }).setView([lat, lng], 14);
+
+    // Smooth Zoom Control Position
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Tile Layer (Clean, Professional Look)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap Contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Custom Temple Icon
+    const templeIcon = L.icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+        iconSize: [42, 42],
+        iconAnchor: [21, 42],
+        popupAnchor: [0, -36]
+    });
+
+    // Marker with Animation
+    const marker = L.marker([lat, lng], {
+        icon: templeIcon,
+        riseOnHover: true
+    }).addTo(map);
+
+    // Elegant Popup
+    marker.bindPopup(`
+        <div style="
+            font-family: Montserrat, sans-serif;
+            text-align:center;
+            padding:8px;
+        ">
+            <h3 style="
+                font-weight:700;
+                font-size:14px;
+                color:#1A5F7A;
+                margin-bottom:4px;
+            ">
+                ${templeName}
+            </h3>
+            <p style="
+                font-size:11px;
+                color:#555;
+                margin:0 0 6px 0;
+            ">
+                Sacred Location
+            </p>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="font-size:11px;color:#FFC107;font-weight:700;text-decoration:none;">Get Directions</a>
+        </div>
+    `);
+
+    // Smooth fly animation on load
+    map.flyTo([lat, lng], 15, {
+        animate: true,
+        duration: 2
+    });
+
+    // Hover zoom effect
+    marker.on('mouseover', function () {
+        map.setZoom(16, { animate: true });
+    });
+
+    marker.on('mouseout', function () {
+        map.setZoom(15, { animate: true });
+    });
+
+});
+
+{% endif %}
+</script>
+
+{% endblock %}
